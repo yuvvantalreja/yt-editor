@@ -1,5 +1,16 @@
 # Class to Function Component Migration Plan for Vega Editor
 
+
+
+1/6/25:
+- transition to vite
+- transition to redux toolkit
+- findDomNode issue
+- debug-pane issue
+- compiled spec issue
+
+
+
 This document outlines a comprehensive plan for migrating class components to functional components with hooks in the Vega Editor project.
 
 ## Table of Contents

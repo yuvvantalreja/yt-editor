@@ -9,11 +9,10 @@
   "license": "BSD-3-Clause",
   "type": "module",
   "devDependencies": {
-    "@parcel/resolver-glob": "^2.12.0",
-    "@parcel/transformer-inline-string": "2.12.0",
     "@types/node": "^22.15.24",
     "@typescript-eslint/eslint-plugin": "^7.15.0",
     "@typescript-eslint/parser": "^7.15.0",
+    "@vitejs/plugin-react": "^4.2.1",
     "assert": "^2.1.0",
     "autoprefixer": "^10.4.21",
     "browserify-zlib": "^0.2.0",
@@ -26,17 +25,17 @@
     "https-browserify": "^1.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
-    "parcel": "^2.12.0",
-    "parcel-reporter-static-files-copy": "^1.5.3",
     "patch-package": "^8.0.0",
     "path-browserify": "^1.0.1",
     "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.5.3",
+    "rimraf": "^3.0.2",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "typescript": "^5.8.2",
     "url": "^0.11.4",
-    "util": "^0.12.5"
+    "util": "^0.12.5",
+    "vite": "^5.0.0"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -99,10 +98,10 @@
     ]
   },
   "scripts": {
-    "start": "PARCEL_BUILD_COMMIT_HASH=$(git rev-parse HEAD) parcel --watch-dir .. index.html",
+    "start": "vite",
     "build": "npm run clean && npm run vendor && npm run build:only",
-    "build:only": "PARCEL_BUILD_COMMIT_HASH=$(git rev-parse HEAD) parcel build --public-url /editor --no-scope-hoist index.html",
-    "vercel-build": "npm run clean && npm run vendor && PARCEL_BUILD_COMMIT_HASH=$(git rev-parse HEAD) parcel build --no-scope-hoist index.html && cp -n -r public/* dist || true",
+    "build:only": "vite build",
+    "vercel-build": "npm run clean && npm run vendor && vite build && cp -n -r public/* dist || true",
     "clean": "rimraf dist public/spec public/data",
     "postbuild": "cp -n -r public/* dist || true",
     "generate-example-images": "scripts/generate-example-images.sh",
@@ -113,12 +112,7 @@
     "lint": "eslint . && npm run prettierbase -- --check",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "postinstall": "husky && npx patch-package"
-  },
-  "@parcel/resolver-default": {
-    "packageExports": true
-  },
-  "staticFiles": {
-    "staticPath": "public"
+    "postinstall": "husky && npx patch-package",
+    "preview": "vite preview"
   }
 }

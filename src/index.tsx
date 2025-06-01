@@ -5,6 +5,7 @@ import {HashRouter as Router} from 'react-router-dom';
 import * as vega from 'vega';
 import * as vegaLite from 'vega-lite';
 import setupMonaco from './utils/monaco.js';
+import {loadSpecs} from './constants/specs.js';
 
 import AppShell from './components/app-shell.js';
 import configureStore from './store/configure-store.js';
@@ -33,26 +34,34 @@ try {
 export const store = configureStore();
 console.log('Store configuration complete');
 
-try {
-  console.log('Rendering React application...');
-  const container = document.getElementById('root');
-  if (!container) {
-    throw new Error('Root element not found');
+async function initApp() {
+  try {
+    console.log('Loading specs...');
+    await loadSpecs();
+    console.log('Specs loaded successfully');
+
+    console.log('Rendering React application...');
+    const container = document.getElementById('root');
+    if (!container) {
+      throw new Error('Root element not found');
+    }
+    const root = createRoot(container);
+    root.render(
+      <React.StrictMode>
+        <Provider store={store}>
+          <Router basename="/">
+            <AppShell />
+          </Router>
+        </Provider>
+      </React.StrictMode>,
+    );
+    console.log('React application rendered');
+  } catch (error) {
+    console.error('Error during initialization:', error);
   }
-  const root = createRoot(container);
-  root.render(
-    <React.StrictMode>
-      <Provider store={store}>
-        <Router basename="/">
-          <AppShell />
-        </Router>
-      </Provider>
-    </React.StrictMode>,
-  );
-  console.log('React application rendered');
-} catch (error) {
-  console.error('Error during React rendering:', error);
 }
+
+initApp();
 
 /* tslint:disable */
 console.log('%cWelcome to the Vega-Editor!', 'font-size: 16px; font-weight: bold;');
