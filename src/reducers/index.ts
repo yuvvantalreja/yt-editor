@@ -192,7 +192,10 @@ function parseVega(
     infos: currLogger.infos,
     debugs: currLogger.debugs,
 
-    // extend with other changes
+    debugPane: state.debugPane,
+    debugPaneSize: state.debugPaneSize,
+    navItem: state.navItem,
+
     ...extend,
   };
 }
@@ -274,7 +277,10 @@ function parseVegaLite(
     infos: currLogger.infos,
     debugs: currLogger.debugs,
 
-    // extend with other changes
+    debugPane: state.debugPane,
+    debugPaneSize: state.debugPaneSize,
+    navItem: state.navItem,
+
     ...extend,
   };
 }
@@ -301,13 +307,11 @@ function parseConfig(state: State, action: SetConfig, extend: Partial<State> = {
     debugs: [],
     infos: [],
 
-    // extend with other changes
     ...extend,
   };
 }
 
 export default (state: State = DEFAULT_STATE, action: Action): State => {
-  // Copy all changes to state from dataflow reducer to state
   state = {...state, ...dataflowReducer(state, action)};
   switch (action.type) {
     case SET_MODE:
@@ -330,6 +334,10 @@ export default (state: State = DEFAULT_STATE, action: Action): State => {
         infos: [],
         debugs: [],
         expressionInterpreter: false,
+
+        debugPane: state.debugPane,
+        debugPaneSize: state.debugPaneSize,
+        navItem: state.navItem,
       };
     case SET_MODE_ONLY:
       return {

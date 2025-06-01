@@ -19,6 +19,8 @@ const defaultState = {
   header: '',
   maxRange: 0,
   range: 0,
+  splitSizes: [100, 0],
+  lastNonZeroSize: 30,
 };
 
 type State = Readonly<typeof defaultState>;
@@ -28,10 +30,19 @@ type Props = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchT
 export default class VizPane extends React.PureComponent<Props, State> {
   constructor(props) {
     super(props);
-    this.state = defaultState;
+    const debugPanePercentage = props.debugPane
+      ? Math.min(Math.max((props.debugPaneSize / window.innerHeight) * 100, 20), 50)
+      : (LAYOUT.DebugHeaderHeight / window.innerHeight) * 100;
+
+    this.state = {
+      ...defaultState,
+      splitSizes: [100 - debugPanePercentage, debugPanePercentage],
+      lastNonZeroSize: props.debugPane ? debugPanePercentage : 30,
+    };
     this.handleChange = this.handleChange.bind(this);
     this.getContextViewer = this.getContextViewer.bind(this);
   }
+
   public componentDidMount() {
     if (this.props.logs) {
       this.props.showLogs(true);
@@ -72,16 +83,38 @@ export default class VizPane extends React.PureComponent<Props, State> {
 
   public handleChange(sizes: number[]) {
     const size = sizes[1] * window.innerHeight;
+    const headerHeightPercent = (LAYOUT.DebugHeaderHeight / window.innerHeight) * 100;
+
+    this.setState({
+      splitSizes: sizes,
+      lastNonZeroSize: sizes[1] > headerHeightPercent ? sizes[1] : this.state.lastNonZeroSize,
+    });
+
     this.props.setDebugPaneSize(size);
-    if ((size > LAYOUT.MinPaneSize && !this.props.debugPane) || (size === LAYOUT.MinPaneSize && this.props.debugPane)) {
+
+    if (size > LAYOUT.MinPaneSize + 20 && !this.props.debugPane) {
+      this.props.toggleDebugPane();
+    } else if (size <= LAYOUT.MinPaneSize + 20 && this.props.debugPane) {
       this.props.toggleDebugPane();
     }
   }
 
-  public componentDidUpdate() {
-    if (this.props.debugPaneSize === LAYOUT.MinPaneSize) {
-      this.props.setDebugPaneSize(LAYOUT.DebugPaneSize);
+  public componentDidUpdate(prevProps) {
+    if (this.props.debugPane !== prevProps.debugPane) {
+      if (this.props.debugPane) {
+        const expandedSize = Math.max(this.state.lastNonZeroSize, 20);
+        this.setState({
+          splitSizes: [100 - expandedSize, expandedSize],
+        });
+
+        const sizeInPixels = (expandedSize / 100) * window.innerHeight;
+        this.props.setDebugPaneSize(sizeInPixels);
+      } else {
+        const headerHeightPercent = (LAYOUT.DebugHeaderHeight / window.innerHeight) * 100;
+        this.setState({splitSizes: [100 - headerHeightPercent, headerHeightPercent]});
+      }
     }
+
     if (this.props.error || this.props.errors.length) {
       this.props.showLogs(true);
     }
@@ -122,14 +155,11 @@ export default class VizPane extends React.PureComponent<Props, State> {
       </div>
     );
 
-    // Calculate initial sizes based on debugPane state
-    const initialSizes = this.props.debugPane ? [70, 30] : [100, 0];
-
     return (
       <div style={{height: '100%', display: 'flex', flexDirection: 'column'}}>
         <Split
-          sizes={initialSizes}
-          minSize={LAYOUT.MinPaneSize}
+          sizes={this.state.splitSizes}
+          minSize={(LAYOUT.DebugHeaderHeight / window.innerHeight) * 100}
           expandToMin={false}
           gutterSize={10}
           gutterAlign="center"
@@ -144,10 +174,8 @@ export default class VizPane extends React.PureComponent<Props, State> {
             }
           }}
           onDragEnd={() => {
-            if (this.props.debugPaneSize === LAYOUT.MinPaneSize) {
+            if (this.props.debugPane && this.props.debugPaneSize <= LAYOUT.MinPaneSize) {
               this.props.setDebugPaneSize(LAYOUT.DebugPaneSize);
-              // Popping up the the debug panel for the first time will set its
-              // height to LAYOUT.DebugPaneSize. This can change depending on the UI.
             }
           }}
         >
@@ -155,11 +183,13 @@ export default class VizPane extends React.PureComponent<Props, State> {
 
           <div className="debug-pane">
             <DebugPaneHeader />
-            {this.props.error || (this.props.logs && this.props.navItem === NAVBAR.Logs) ? (
-              <ErrorPane />
-            ) : (
-              this.getContextViewer()
-            )}
+            <div className="debug-pane-content" style={{display: this.props.debugPane ? 'flex' : 'none'}}>
+              {this.props.error || (this.props.logs && this.props.navItem === NAVBAR.Logs) ? (
+                <ErrorPane />
+              ) : (
+                this.getContextViewer()
+              )}
+            </div>
           </div>
         </Split>
       </div>

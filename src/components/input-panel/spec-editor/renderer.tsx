@@ -198,6 +198,11 @@ class Editor extends React.PureComponent<Props> {
       prevProps.editorRef && prevProps.editorRef.deltaDecorations(prevProps.decorations, []);
     }
 
+    if (prevProps.editorString !== this.props.editorString && this.editor) {
+      this.editor.getModel().setValue(this.props.editorString);
+      this.editor.layout();
+    }
+
     if (this.editor && this.props.parse) {
       this.editor.focus();
       this.editor.layout();
@@ -268,7 +273,7 @@ class Editor extends React.PureComponent<Props> {
             },
           }}
           onChange={debounce(700, this.handleEditorChange)}
-          defaultValue={this.props.editorString}
+          value={this.props.editorString}
           onMount={this.editorDidMount}
           beforeMount={this.editorWillMount}
         />

@@ -12,17 +12,26 @@
 
 .debug-pane {
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--light-gray-color);
+  overflow: hidden;
+}
+
+.debug-pane-content {
+  width: 100%;
+  flex: 1;
   background: var(--white-color);
   display: flex;
   flex-direction: column;
-
-  .tabs-nav {
-    height: inherit;
-  }
+  overflow: auto;
 }
 
 .pane-header {
-  line-height: 30px;
+  flex-shrink: 0;
+  height: 36px;
+  line-height: 36px;
   display: flex;
   align-items: center;
   justify-content: space-between;

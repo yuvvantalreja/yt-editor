@@ -24,9 +24,7 @@ class DebugPaneHeader extends React.PureComponent<Props> {
           <li
             className={error || (logs && navItem === NAVBAR.Logs) ? 'active-tab' : undefined}
             onClick={(e) => {
-              if (debugPane) {
-                e.stopPropagation();
-              }
+              e.stopPropagation();
               showLogs(true);
               toggleNavbar(NAVBAR.Logs);
             }}
@@ -46,9 +44,7 @@ class DebugPaneHeader extends React.PureComponent<Props> {
             <li
               className={navItem === NAVBAR.DataViewer ? 'active-tab' : undefined}
               onClick={(e) => {
-                if (debugPane) {
-                  e.stopPropagation();
-                }
+                e.stopPropagation();
                 showLogs(false);
                 toggleNavbar(NAVBAR.DataViewer);
               }}
@@ -60,9 +56,7 @@ class DebugPaneHeader extends React.PureComponent<Props> {
             <li
               className={navItem === NAVBAR.SignalViewer ? 'active-tab' : undefined}
               onClick={(e) => {
-                if (debugPane) {
-                  e.stopPropagation();
-                }
+                e.stopPropagation();
                 showLogs(false);
                 toggleNavbar(NAVBAR.SignalViewer);
               }}
@@ -74,9 +68,7 @@ class DebugPaneHeader extends React.PureComponent<Props> {
             <li
               className={navItem === NAVBAR.DataflowViewer ? 'active-tab' : undefined}
               onClick={(e) => {
-                if (debugPane) {
-                  e.stopPropagation();
-                }
+                e.stopPropagation();
                 showLogs(false);
                 toggleNavbar(NAVBAR.DataflowViewer);
               }}

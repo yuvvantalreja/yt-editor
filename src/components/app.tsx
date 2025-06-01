@@ -75,8 +75,16 @@ class App extends React.PureComponent<PropsType> {
   }
 
   public componentDidUpdate(prevProps) {
-    if (hash(this.props.params) !== hash(prevProps.params)) {
-      this.setSpecInUrl(this.props.params);
+    const prevParams = prevProps.params;
+    const currentParams = this.props.params;
+
+    if (
+      prevParams.example_name !== currentParams.example_name ||
+      prevParams.mode !== currentParams.mode ||
+      prevParams.id !== currentParams.id ||
+      prevParams.compressed !== currentParams.compressed
+    ) {
+      this.setSpecInUrl(currentParams);
     }
   }
 
@@ -96,21 +104,41 @@ class App extends React.PureComponent<PropsType> {
     const name = parameter.example_name;
     this.props.setConfig(this.props.configEditorString);
     this.props.setSidePaneItem(SIDEPANE.Editor);
-    this.props.editorRef?.focus();
-    switch (parameter.mode) {
-      case 'vega': {
-        const r = await fetch(`./spec/vega/${name}.vg.json`);
-        this.props.setVegaExample(name, await r.text());
-        break;
+
+    try {
+      switch (parameter.mode) {
+        case 'vega': {
+          const r = await fetch(`./spec/vega/${name}.vg.json`);
+          const specText = await r.text();
+
+          this.props.setVegaExample(name, specText);
+
+          if (this.props.editorRef) {
+            setTimeout(() => {
+              this.props.editorRef.focus();
+            }, 50);
+          }
+          break;
+        }
+        case 'vega-lite': {
+          const r = await fetch(`./spec/vega-lite/${name}.vl.json`);
+          const specText = await r.text();
+
+          this.props.setVegaLiteExample(name, specText);
+
+          if (this.props.editorRef) {
+            setTimeout(() => {
+              this.props.editorRef.focus();
+            }, 50);
+          }
+          break;
+        }
+        default:
+          console.warn(`Unknown mode ${parameter.mode}`);
+          break;
       }
-      case 'vega-lite': {
-        const r = await fetch(`./spec/vega-lite/${name}.vl.json`);
-        this.props.setVegaLiteExample(name, await r.text());
-        break;
-      }
-      default:
-        console.warn(`Unknown mode ${parameter.mode}`);
-        break;
+    } catch (error) {
+      console.error(`Error loading example ${name}:`, error);
     }
   }
 
